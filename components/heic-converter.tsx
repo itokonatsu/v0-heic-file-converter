@@ -18,8 +18,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import heic2any from "heic2any"
-import JSZip from "jszip"
 
 interface ConvertedFile {
   id: string
@@ -50,6 +48,8 @@ export function HeicConverter() {
   }, [])
 
   const processFiles = async (fileList: FileList) => {
+    const heic2any = (await import("heic2any")).default
+
     const heicFiles = Array.from(fileList).filter(
       (file) =>
         file.type === "image/heic" ||
@@ -94,13 +94,16 @@ export function HeicConverter() {
     }
   }
 
-  const handleDrop = useCallback(async (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
+  const handleDrop = useCallback(
+    async (e: React.DragEvent) => {
+      e.preventDefault()
+      setIsDragging(false)
 
-    const fileList = e.dataTransfer.files
-    await processFiles(fileList)
-  }, [])
+      const fileList = e.dataTransfer.files
+      await processFiles(fileList)
+    },
+    [outputFormat],
+  )
 
   const handleFileInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -129,6 +132,8 @@ export function HeicConverter() {
   }
 
   const applyBatchDownload = async () => {
+    const JSZip = (await import("jszip")).default
+
     const readyFiles = files.filter((f) => f.status === "ready")
     if (readyFiles.length === 0) return
 
